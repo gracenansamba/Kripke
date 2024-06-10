@@ -13,6 +13,11 @@
 
 using namespace Kripke;
 
+#ifdef KRIPKE_USE_CALIPER
+#include <adiak.hpp>
+#include <caliper/cali.h>
+#endif
+
 ParallelComm::ParallelComm(Kripke::Core::DataStore &data_store) :
   m_data_store(&data_store)
 {
@@ -103,6 +108,8 @@ void ParallelComm::postRecvs(Kripke::Core::DataStore &data_store, SdomId sdom_id
     GlobalSdomId global_sdom_id = local_to_global(sdom_id);
 
     // Post the recieve
+    cali::Annotation::Guard
+            g(cali::Annotation("cali.communication", CALI_ATTR_NESTED | CALI_ATTR_LEVEL_1).begin("post recieve"));
     MPI_Irecv(plane_data_ptr, plane_data_size, MPI_DOUBLE, upwind_rank,
       *global_sdom_id, MPI_COMM_WORLD, &recv_requests[recv_requests.size()-1]);
 
@@ -173,6 +180,8 @@ void ParallelComm::postSends(Kripke::Core::DataStore &data_store, Kripke::SdomId
     size_t plane_data_size = plane_data.size(sdom_id);
 
     // Post the send
+    cali::Annotation::Guard
+            g(cali::Annotation("cali.communication", CALI_ATTR_NESTED | CALI_ATTR_LEVEL_1).begin("post send"));
     MPI_Isend(src_buffers[*dim], plane_data_size, MPI_DOUBLE, downwind_rank,
       *downwind_sdom, MPI_COMM_WORLD, &send_requests[send_requests.size()-1]);
 
@@ -200,6 +209,9 @@ void ParallelComm::waitAllSends(void){
 #ifdef KRIPKE_USE_MPI
   // Wait for all remaining sends to complete, then return false
   int num_sends = send_requests.size();
+ 
+  cali::Annotation::Guard
+            g(cali::Annotation("cali.communication", CALI_ATTR_NESTED | CALI_ATTR_LEVEL_1).begin("Wait for sends"));
   if(num_sends > 0){
     std::vector<MPI_Status> status(num_sends);
     MPI_Waitall(num_sends, &send_requests[0], &status[0]);
