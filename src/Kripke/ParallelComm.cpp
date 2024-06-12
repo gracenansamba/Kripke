@@ -64,6 +64,7 @@ void ParallelComm::dequeueSubdomain(SdomId sdom_id){
   All receives use the plane_data[] arrays as receive buffers.
 */
 void ParallelComm::postRecvs(Kripke::Core::DataStore &data_store, SdomId sdom_id){
+  CALI_MARK_COMM_REGION_BEGIN("post recieve");
   using namespace Kripke::Core;
   Comm comm;
   int mpi_rank = comm.rank();
@@ -108,8 +109,6 @@ void ParallelComm::postRecvs(Kripke::Core::DataStore &data_store, SdomId sdom_id
     GlobalSdomId global_sdom_id = local_to_global(sdom_id);
 
     // Post the recieve
-    cali::Annotation::Guard
-            g(cali::Annotation("cali.communication", CALI_ATTR_NESTED | CALI_ATTR_LEVEL_1).begin("post recieve"));
     MPI_Irecv(plane_data_ptr, plane_data_size, MPI_DOUBLE, upwind_rank,
       *global_sdom_id, MPI_COMM_WORLD, &recv_requests[recv_requests.size()-1]);
 
@@ -124,11 +123,14 @@ void ParallelComm::postRecvs(Kripke::Core::DataStore &data_store, SdomId sdom_id
   // add subdomain to queue
   queue_sdom_ids.push_back(*sdom_id);
   queue_depends.push_back(num_depends);
+  CALI_MARK_COMM_REGION_END("post recieve");
 }
 
 void ParallelComm::postSends(Kripke::Core::DataStore &data_store, Kripke::SdomId sdom_id,
                              double *src_buffers[3])
 {
+  CALI_MARK_COMM_REGION_BEGIN("post sends");
+
   // post sends for downwind dependencies
   Kripke::Core::Comm comm;
   int mpi_rank = comm.rank();
@@ -180,8 +182,6 @@ void ParallelComm::postSends(Kripke::Core::DataStore &data_store, Kripke::SdomId
     size_t plane_data_size = plane_data.size(sdom_id);
 
     // Post the send
-    cali::Annotation::Guard
-            g(cali::Annotation("cali.communication", CALI_ATTR_NESTED | CALI_ATTR_LEVEL_1).begin("post send"));
     MPI_Isend(src_buffers[*dim], plane_data_size, MPI_DOUBLE, downwind_rank,
       *downwind_sdom, MPI_COMM_WORLD, &send_requests[send_requests.size()-1]);
 
@@ -189,13 +189,14 @@ void ParallelComm::postSends(Kripke::Core::DataStore &data_store, Kripke::SdomId
     // We cannot SEND anything without MPI, so fail
     KRIPKE_ASSERT("Cannot send messages without MPI");
 #endif
-
+  CALI_MARK_COMM_REGION_END("post recieve");
   }
 }
 
 
 // Checks if there are any outstanding subdomains to complete
 bool ParallelComm::workRemaining(void){
+  CALI_MARK_COMM_REGION_BEGIN("wait for sends");
 #ifdef KRIPKE_USE_MPI
   return (recv_requests.size() > 0 || queue_sdom_ids.size() > 0);
 #else
@@ -210,14 +211,14 @@ void ParallelComm::waitAllSends(void){
   // Wait for all remaining sends to complete, then return false
   int num_sends = send_requests.size();
  
-  cali::Annotation::Guard
-            g(cali::Annotation("cali.communication", CALI_ATTR_NESTED | CALI_ATTR_LEVEL_1).begin("Wait for sends"));
   if(num_sends > 0){
     std::vector<MPI_Status> status(num_sends);
     MPI_Waitall(num_sends, &send_requests[0], &status[0]);
     send_requests.clear();
   }
 #endif
+  CALI_MARK_COMM_REGION_END("wait for sends");
+
 }
 
 /**
