@@ -189,8 +189,9 @@ void ParallelComm::postSends(Kripke::Core::DataStore &data_store, Kripke::SdomId
     // We cannot SEND anything without MPI, so fail
     KRIPKE_ASSERT("Cannot send messages without MPI");
 #endif
-  CALI_MARK_COMM_REGION_END("post recieve");
   }
+  CALI_MARK_COMM_REGION_END("post recieve");
+
 }
 
 
