@@ -197,7 +197,6 @@ void ParallelComm::postSends(Kripke::Core::DataStore &data_store, Kripke::SdomId
 
 // Checks if there are any outstanding subdomains to complete
 bool ParallelComm::workRemaining(void){
-  CALI_MARK_COMM_REGION_BEGIN("wait for sends");
 #ifdef KRIPKE_USE_MPI
   return (recv_requests.size() > 0 || queue_sdom_ids.size() > 0);
 #else
@@ -208,6 +207,8 @@ bool ParallelComm::workRemaining(void){
 
 // Blocks until all sends have completed, and flushes the send queues
 void ParallelComm::waitAllSends(void){
+  CALI_MARK_COMM_REGION_BEGIN("wait for sends");
+
 #ifdef KRIPKE_USE_MPI
   // Wait for all remaining sends to complete, then return false
   int num_sends = send_requests.size();
