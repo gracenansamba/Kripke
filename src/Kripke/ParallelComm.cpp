@@ -213,6 +213,7 @@ void ParallelComm::waitAllSends(void){
 */
 void ParallelComm::testRecieves(void){
 #ifdef KRIPKE_USE_MPI
+  CALI_MARK_COMM_REGION_BEGIN("halo_exchange");
   // Check for any recv requests that have completed
   int num_requests = recv_requests.size();
   bool done = false;
@@ -247,6 +248,7 @@ void ParallelComm::testRecieves(void){
       done = true;
     }
   }
+  CALI_MARK_COMM_REGION_END("halo_exchange");
 #endif
 }
 
