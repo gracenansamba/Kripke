@@ -281,12 +281,12 @@ void ParallelComm::testRecieves(void){
   int num_requests = recv_requests.size();
   bool done = false;
   while(!done && num_requests > 0){
-    // Create an array of status variables
-    std::vector<MPI_Status> recv_status(num_requests);
+    // Create a status variable
+    MPI_Status recv_status;
 
     // Wait for any one of the recvs to complete
     int index; // this will be the index of the request that completed
-    MPI_Waitany(num_requests, &recv_requests[0], &index, &recv_status[0]);
+    MPI_Waitany(num_requests, &recv_requests[0], &index, &recv_status);
 
     // If index is MPI_UNDEFINED, then there are no active requests
     if(index != MPI_UNDEFINED){
@@ -315,6 +315,7 @@ void ParallelComm::testRecieves(void){
 
 #endif
 }
+
 
 
 std::vector<SdomId> ParallelComm::getReadyList(void){
