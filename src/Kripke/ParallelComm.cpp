@@ -226,6 +226,8 @@ void ParallelComm::waitAllSends(void){
 /**
   Checks for incomming messages, and does relevant bookkeeping.
 */
+
+/*
 void ParallelComm::testRecieves(void){
 #ifdef KRIPKE_USE_MPI
   // Check for any recv requests that have completed
@@ -257,6 +259,50 @@ void ParallelComm::testRecieves(void){
       for(size_t i = 0;i < queue_sdom_ids.size();++ i){
         if(queue_sdom_ids[i] == sdom_id){
           queue_depends[i] --;
+          break;
+        }
+      }
+    }
+    else{
+      done = true;
+    }
+  }
+  CALI_MARK_COMM_REGION_END("halo_exchange");
+
+#endif
+}
+*/
+
+void ParallelComm::testRecieves(void){
+#ifdef KRIPKE_USE_MPI
+  // Check for any recv requests that have completed
+  CALI_MARK_COMM_REGION_BEGIN("halo_exchange");
+
+  int num_requests = recv_requests.size();
+  bool done = false;
+  while(!done && num_requests > 0){
+    // Create an array of status variables
+    std::vector<MPI_Status> recv_status(num_requests);
+
+    // Wait for any one of the recvs to complete
+    int index; // this will be the index of the request that completed
+    MPI_Waitany(num_requests, &recv_requests[0], &index, &recv_status[0]);
+
+    // If index is MPI_UNDEFINED, then there are no active requests
+    if(index != MPI_UNDEFINED){
+
+      // get subdomain that this completed for
+      int sdom_id = recv_subdomains[index];
+
+      // remove the request from the list
+      recv_requests.erase(recv_requests.begin() + index);
+      recv_subdomains.erase(recv_subdomains.begin() + index);
+      num_requests--;
+
+      // decrement the dependency count for that subdomain
+      for(size_t i = 0; i < queue_sdom_ids.size(); ++i){
+        if(queue_sdom_ids[i] == sdom_id){
+          queue_depends[i]--;
           break;
         }
       }
