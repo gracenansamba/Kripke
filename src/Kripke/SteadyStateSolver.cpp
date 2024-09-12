@@ -108,7 +108,7 @@ printf("discrete transformation");
 
       // Sweep everything
       Kripke::SweepSolver(data_store, sdom_list, block_jacobi);
-     printf("after sweep solver")'
+     printf("after sweep solver");
     }
 
 
