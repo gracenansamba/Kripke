@@ -227,7 +227,7 @@ void ParallelComm::waitAllSends(void){
   Checks for incomming messages, and does relevant bookkeeping.
 */
 
-/*
+
 void ParallelComm::testRecieves(void){
 #ifdef KRIPKE_USE_MPI
   // Check for any recv requests that have completed
@@ -242,8 +242,7 @@ void ParallelComm::testRecieves(void){
     // Ask if either one or none of the recvs have completed?
     int index; // this will be the index of request that completed
     int complete_flag; // this is set to TRUE if somthing completed
-    // MPI_Testany(num_requests, &recv_requests[0], &index, &complete_flag, &recv_status[0]);
-    MPI_Waitany(num_requests, &recv_requests[0], &index, &recv_status[0]);
+     MPI_Testany(num_requests, &recv_requests[0], &index, &complete_flag, &recv_status[0]);
 
     if(complete_flag != 0){
 
@@ -271,9 +270,9 @@ void ParallelComm::testRecieves(void){
 
 #endif
 }
-*/
 
-void ParallelComm::testRecieves(void){
+
+/*void ParallelComm::testRecieves(void){
 #ifdef KRIPKE_USE_MPI
   // Check for any recv requests that have completed
   CALI_MARK_COMM_REGION_BEGIN("halo_exchange");
@@ -315,7 +314,7 @@ void ParallelComm::testRecieves(void){
 
 #endif
 }
-
+*/
 
 
 std::vector<SdomId> ParallelComm::getReadyList(void){
