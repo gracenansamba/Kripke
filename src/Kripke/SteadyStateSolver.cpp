@@ -28,6 +28,7 @@ using namespace Kripke::Core;
 int Kripke::SteadyStateSolver (Kripke::Core::DataStore &data_store, size_t max_iter, bool block_jacobi)
 {
   KRIPKE_TIMER(data_store, Solve);
+
   PartitionSpace &pspace = data_store.getVariable<PartitionSpace>("pspace");
 
   Kripke::Core::Comm const &comm = data_store.getVariable<Kripke::Core::Comm>("comm");
@@ -61,25 +62,24 @@ int Kripke::SteadyStateSolver (Kripke::Core::DataStore &data_store, size_t max_i
     Kripke::Kernel::kConst(data_store.getVariable<Field_Moments>("phi"), 0.0);
     Kripke::Kernel::LTimes(data_store);
 
-
-
     // Compute Scattering Source Term (psi_out = S*phi)
     Kripke::Kernel::kConst(data_store.getVariable<Kripke::Field_Moments>("phi_out"), 0.0);
     Kripke::Kernel::scattering(data_store);
 
+
     // Compute External Source Term (psi_out = psi_out + Q)
     Kripke::Kernel::source(data_store);
+
 
     // Moments to Discrete transformation (rhs = LPlus*psi_out)
     Kripke::Kernel::kConst(data_store.getVariable<Kripke::Field_Flux>("rhs"), 0.0);
     Kripke::Kernel::LPlusTimes(data_store);
 
 
-
-
     /*
      * Sweep (psi = Hinv*rhs)
      */
+     {
       // Create a list of all groups
       int num_subdomains = pspace.getNumSubdomains(SPACE_PQR);
       std::vector<SdomId> sdom_list(num_subdomains);
@@ -90,6 +90,7 @@ int Kripke::SteadyStateSolver (Kripke::Core::DataStore &data_store, size_t max_i
       // Sweep everything
       Kripke::SweepSolver(data_store, sdom_list, block_jacobi);
     }
+
 
 
     /*
