@@ -64,7 +64,6 @@ void ParallelComm::dequeueSubdomain(SdomId sdom_id){
   All receives use the plane_data[] arrays as receive buffers.
 */
 void ParallelComm::postRecvs(Kripke::Core::DataStore &data_store, SdomId sdom_id){
-  CALI_MARK_COMM_REGION_BEGIN("halo_exchange");
   using namespace Kripke::Core;
   Comm comm;
   int mpi_rank = comm.rank();
@@ -123,13 +122,11 @@ void ParallelComm::postRecvs(Kripke::Core::DataStore &data_store, SdomId sdom_id
   // add subdomain to queue
   queue_sdom_ids.push_back(*sdom_id);
   queue_depends.push_back(num_depends);
-  CALI_MARK_COMM_REGION_END("halo_exchange");
 }
 
 void ParallelComm::postSends(Kripke::Core::DataStore &data_store, Kripke::SdomId sdom_id,
                              double *src_buffers[3])
 {
-  CALI_MARK_COMM_REGION_BEGIN("halo_exchange");
 
   // post sends for downwind dependencies
   Kripke::Core::Comm comm;
@@ -190,8 +187,6 @@ void ParallelComm::postSends(Kripke::Core::DataStore &data_store, Kripke::SdomId
     KRIPKE_ASSERT("Cannot send messages without MPI");
 #endif
   }
-  CALI_MARK_COMM_REGION_END("halo_exchange");
-
 }
 
 
@@ -207,8 +202,6 @@ bool ParallelComm::workRemaining(void){
 
 // Blocks until all sends have completed, and flushes the send queues
 void ParallelComm::waitAllSends(void){
-  CALI_MARK_COMM_REGION_BEGIN("halo_exchange");
-
 #ifdef KRIPKE_USE_MPI
   // Wait for all remaining sends to complete, then return false
   int num_sends = send_requests.size();
@@ -219,8 +212,6 @@ void ParallelComm::waitAllSends(void){
     send_requests.clear();
   }
 #endif
-  CALI_MARK_COMM_REGION_END("halo_exchange");
-
 }
 
 /**
@@ -231,8 +222,6 @@ void ParallelComm::waitAllSends(void){
 void ParallelComm::testRecieves(void){
 #ifdef KRIPKE_USE_MPI
   // Check for any recv requests that have completed
-  CALI_MARK_COMM_REGION_BEGIN("halo_exchange");
-
   int num_requests = recv_requests.size();
   bool done = false;
   while(!done && num_requests > 0){
@@ -266,8 +255,6 @@ void ParallelComm::testRecieves(void){
       done = true;
     }
   }
-  CALI_MARK_COMM_REGION_END("halo_exchange");
-
 #endif
 }
 
