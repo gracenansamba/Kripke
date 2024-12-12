@@ -28,7 +28,7 @@ void Kripke::SweepSolver (Kripke::Core::DataStore &data_store, std::vector<SdomI
   Kripke::Kernel::kConst(data_store.getVariable<Field_IPlane>("i_plane"), 0.0);
   Kripke::Kernel::kConst(data_store.getVariable<Field_JPlane>("j_plane"), 0.0);
   Kripke::Kernel::kConst(data_store.getVariable<Field_KPlane>("k_plane"), 0.0);
-
+ 
   // Create a new sweep communicator object
   ParallelComm *comm = NULL;
   if(block_jacobi){
@@ -37,7 +37,7 @@ void Kripke::SweepSolver (Kripke::Core::DataStore &data_store, std::vector<SdomI
   else {
     comm = new SweepComm(data_store);
   }
-
+  CALI_MARK_COMM_REGION_BEGIN("sweep_comm");
   // Add all subdomains in our list
   for(size_t i = 0;i < subdomain_list.size();++ i){
 //    Kripke::Core::Comm default_comm;
@@ -78,7 +78,7 @@ void Kripke::SweepSolver (Kripke::Core::DataStore &data_store, std::vector<SdomI
       comm->markComplete(sdom_id);
     }
   }
-
+  CALI_MARK_COMM_REGION_END("sweep_comm");
   delete comm;
 
 //  printf("\nAfter sweep psi:\n");
