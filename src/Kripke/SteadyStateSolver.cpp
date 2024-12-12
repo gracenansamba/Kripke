@@ -38,6 +38,8 @@ int Kripke::SteadyStateSolver (Kripke::Core::DataStore &data_store, size_t max_i
     printf("==================\n\n");
   }
 
+  CALI_MARK_COMM_REGION_BEGIN("sweep_comm");
+
   // Intialize unknowns
   Kripke::Kernel::kConst(data_store.getVariable<Kripke::Field_Flux>("psi"), 0.0);
 
@@ -110,6 +112,7 @@ int Kripke::SteadyStateSolver (Kripke::Core::DataStore &data_store, size_t max_i
   if(comm.rank() == 0){
     printf("  Solver terminated\n");
   }
+  CALI_MARK_COMM_REGION_END("sweep_comm");
   return(0);
 }
 
