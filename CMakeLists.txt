@@ -289,6 +289,20 @@ endif()
 message(STATUS "Caliper support is ${KRIPKE_USE_CALIPER}")
 
 
+option(ENABLE_VERNIER "Enable Vernier support" FALSE)
+
+if (ENABLE_VERNIER)
+  set(BUILD_SHARED_LIBS False CACHE BOOL "")
+  add_subdirectory(tpl/vernier)	
+  include_directories(tpl/vernier/include)
+
+	set(KRIPKE_USE_VERNIER TRUE)
+  list(APPEND KRIPKE_DEPENDS vernier)
+endif()
+
+message(STATUS "Vernier support is ${KRIPKE_USE_VERNIER}")
+
+
 #
 # Configure MPI
 # 

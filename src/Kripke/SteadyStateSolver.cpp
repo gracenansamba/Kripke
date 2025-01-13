@@ -20,6 +20,10 @@
 #include <caliper/cali.h>
 #endif
 
+#ifdef KRIPKE_USE_VERNIER
+#include "vernier.h"
+#endif
+
 using namespace Kripke::Core;
 
 /**
@@ -38,7 +42,9 @@ int Kripke::SteadyStateSolver (Kripke::Core::DataStore &data_store, size_t max_i
     printf("==================\n\n");
   }
 
-  CALI_MARK_COMM_REGION_BEGIN("sweep_comm");
+#ifdef KRIPKE_USE_VERNIER
+  begin_pattern("steady_state_comm");
+#endif
 
   // Intialize unknowns
   Kripke::Kernel::kConst(data_store.getVariable<Kripke::Field_Flux>("psi"), 0.0);
@@ -112,10 +118,10 @@ int Kripke::SteadyStateSolver (Kripke::Core::DataStore &data_store, size_t max_i
   if(comm.rank() == 0){
     printf("  Solver terminated\n");
   }
-  CALI_MARK_COMM_REGION_END("sweep_comm");
+
+#ifdef KRIPKE_USE_VERNIER
+  end_pattern("sweep_comm");
+#endif
+
   return(0);
 }
-
-
-
-

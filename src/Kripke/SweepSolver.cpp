@@ -15,6 +15,10 @@
 #include <vector>
 #include <stdio.h>
 
+#ifdef KRIPKE_USE_VERNIER
+#include "vernier.h"
+#endif
+
 using namespace Kripke;
 
 /**
@@ -37,7 +41,11 @@ void Kripke::SweepSolver (Kripke::Core::DataStore &data_store, std::vector<SdomI
   else {
     comm = new SweepComm(data_store);
   }
-  CALI_MARK_COMM_REGION_BEGIN("sweep_comm");
+
+#ifdef KRIPKE_USE_VERNIER
+  begin_pattern("sweep_solver_comm");
+#endif
+
   // Add all subdomains in our list
   for(size_t i = 0;i < subdomain_list.size();++ i){
 //    Kripke::Core::Comm default_comm;
@@ -78,7 +86,11 @@ void Kripke::SweepSolver (Kripke::Core::DataStore &data_store, std::vector<SdomI
       comm->markComplete(sdom_id);
     }
   }
-  CALI_MARK_COMM_REGION_END("sweep_comm");
+
+#ifdef KRIPKE_USE_VERNIER
+  end_pattern();
+#endif
+
   delete comm;
 
 //  printf("\nAfter sweep psi:\n");
