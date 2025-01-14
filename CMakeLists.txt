@@ -16,8 +16,6 @@ cmake_policy(SET CMP0057 NEW)
 project(KRIPKE LANGUAGES CXX)
 
 set(KRIPKE_VERSION "1.2.5-dev")
-
-
 #
 # Initialize the BLT build system
 #
@@ -292,12 +290,16 @@ message(STATUS "Caliper support is ${KRIPKE_USE_CALIPER}")
 option(ENABLE_VERNIER "Enable Vernier support" FALSE)
 
 if (ENABLE_VERNIER)
-  set(BUILD_SHARED_LIBS False CACHE BOOL "")
-  add_subdirectory(tpl/vernier)	
-  include_directories(tpl/vernier/include)
+  if(EXISTS "${PROJECT_SOURCE_DIR}/tpl/vernier/CMakeLists.txt")
+    set(BUILD_SHARED_LIBS False CACHE BOOL "")
+    add_subdirectory(tpl/vernier)
+    include_directories(tpl/vernier/include)
+  else()
+    find_package(Vernier REQUIRED ${Vernier_DIR})
+  endif()
 
-	set(KRIPKE_USE_VERNIER TRUE)
   add_definitions( -DKRIPKE_USE_VERNIER)
+  set(KRIPKE_USE_VERNIER TRUE)
   list(APPEND KRIPKE_DEPENDS vernier)
 endif()
 
