@@ -120,7 +120,7 @@ int Kripke::SteadyStateSolver (Kripke::Core::DataStore &data_store, size_t max_i
   }
 
 #ifdef KRIPKE_USE_VERNIER
-  end_pattern("sweep_comm");
+  end_pattern();
 #endif
 
   return(0);

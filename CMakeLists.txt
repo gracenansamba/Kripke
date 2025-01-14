@@ -297,6 +297,7 @@ if (ENABLE_VERNIER)
   include_directories(tpl/vernier/include)
 
 	set(KRIPKE_USE_VERNIER TRUE)
+  add_definitions( -DKRIPKE_USE_VERNIER)
   list(APPEND KRIPKE_DEPENDS vernier)
 endif()
 
